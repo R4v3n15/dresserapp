@@ -69,4 +69,12 @@ export class LoginPage implements OnInit {
 		await alert.present();
 	}
 
+	wellcomePage(){
+        this.router.navigate(['/wellcome'], {replaceUrl: true});
+	}
+	
+	registerPage(){
+        this.router.navigate(['/signup'], {replaceUrl: true});
+    }
+
 }

@@ -92,5 +92,9 @@ export class SignupPage implements OnInit {
 					});
 
 		await alert.present();
-	}
+    }
+    
+    loginPage(){
+        this.router.navigate(['/login'], {replaceUrl: true});
+    }
 }
