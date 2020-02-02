@@ -28,13 +28,13 @@ export class LoginPage implements OnInit {
 	}
 
 	async authUser() {
-		if (this.password  && this.username  && this.username.length > 4 && this.password.length > 4) {
+		if (this.password  && this.username && this.username.length > 3 && this.password.length > 3) {
 			let loader = await this.loadingCtrl.create({
 							message: 'Plase wait...',
 						});
 			await loader.present();
 
-			this.apiService.authenticateUser({'url': 'login/login', 'username': this.username, 'password': this.password })
+			this.apiService.authenticateUser({'url': 'login', 'username': this.username, 'password': this.password })
 			.pipe(
 				timeout(8000),
 				finalize(() => { loader.dismiss(); })
@@ -45,7 +45,11 @@ export class LoginPage implements OnInit {
 						this.storage.set('userData', response.credentials);
 						this.router.navigate(['/home'], {replaceUrl: true});
 					} else {
-						this.alertError('Code Required', response.message);
+						if(response.type == 'object'){
+							this.alertError('Error', response.message[0]);
+						} else {
+							this.alertError('Error', response.message);
+						}
 					}
 				},
 				(fail) => {
@@ -55,7 +59,7 @@ export class LoginPage implements OnInit {
 				}
 			);
 		} else {
-			this.alertError('Error', 'Please provide a username and password to continue.');
+			this.alertError('Error', 'Please provide a valid username and password to continue.');
 		}
 	}
 

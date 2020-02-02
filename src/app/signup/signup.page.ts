@@ -13,12 +13,12 @@ import { ApiService }           from '../services/api.service';
 })
 export class SignupPage implements OnInit {
     postData = {
-                    url: 'login/signup',
+                    url: 'signup',
                     name: '',
                     username: '',
                     email: '',
                     password: '',
-                    repassword: ''
+                    password_confirmation: ''
                 };
 
     constructor(
@@ -37,12 +37,12 @@ export class SignupPage implements OnInit {
         let name     = this.postData.name.trim();
         let username = this.postData.username.trim();
         let password = this.postData.password.trim();
-        let repassword = this.postData.repassword.trim();
+        let repassword = this.postData.password_confirmation.trim();
         let email = this.postData.email.trim();
         return (
             this.postData.username && username.length > 0 &&
             this.postData.password && password.length > 0 &&
-            this.postData.repassword && repassword.length > 0 &&
+            this.postData.password_confirmation && repassword.length > 0 &&
             this.postData.email && email.length > 0 &&
             this.postData.name && name.length > 0
             
@@ -51,7 +51,7 @@ export class SignupPage implements OnInit {
 
     async registerUser() {
 		if (this.validateInputs()) {
-            if(this.postData.password != this.postData.repassword) {
+            if(this.postData.password != this.postData.password_confirmation) {
                 this.alertError('Validation Error', 'Your passwords must match.');
             }
 			let loader = await this.loadingCtrl.create({
@@ -68,7 +68,8 @@ export class SignupPage implements OnInit {
 				(response: any) => {
 					if(response.success){
 						this.storage.set('userData', response.credentials);
-						this.router.navigate(['/home/feed'], {replaceUrl: true});
+                        this.router.navigate(['/login'], {replaceUrl: true});
+                        this.alertError('You Ready', 'Log in with you new account');
 					} else {
 						this.alertError('Sign Up Fail', response.message);
 					}

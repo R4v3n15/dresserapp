@@ -8,7 +8,7 @@ import { Storage } 			from '@ionic/storage';
 import { Device } 			from '@ionic-native/device/ngx';
 import { Router } 			from '@angular/router';
 
-const _URL_ : String = 'https://smartdresser.org/api/';
+const _URL_ : String = 'https://www.apirest.potokapp.com/';
 @Injectable({
   providedIn: 'root'
 })
@@ -32,21 +32,19 @@ export class ApiService {
 	|--------------------------------------------------------------------------------------------
 	*/
 	authenticateUser(data) {
+		console.log(data);
 		let string 			= data.username+':'+this.device.uuid;
 		let encodedString 	= btoa(string);
 		let headers = new HttpHeaders().set('Content-Type', 'application/json')
 										.set('Authorization', 'Basic '+encodedString);
 
-		return this.http.post(_URL_ + data.url, { usuario: data.username, uuid: this.device.uuid, password: data.password }, {headers});
+		return this.http.post(_URL_ + data.url, { username: data.username, uuid: this.device.uuid, password: data.password }, {headers});
 	}
 
 	registerUser(data) {
-		let string 			= data.username+':'+this.device.uuid;
-		let encodedString 	= btoa(string);
-		let headers = new HttpHeaders().set('Content-Type', 'application/json')
-										.set('Authorization', 'Basic '+encodedString);
-
-		return this.http.post(_URL_ + data.url, { usuario: data.username, uuid: this.device.uuid, password: data.password, email: data.email }, {headers});
+		console.log(data);
+		let headers = new HttpHeaders().set('Content-Type', 'application/json');
+		return this.http.post(_URL_ + data.url, data, {headers});
 	}
 
 	logoutUser(){
