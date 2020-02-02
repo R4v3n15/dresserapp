@@ -1,0 +1,45 @@
+ion-content.background{
+    --background:url(src/assets/images/background-login.jpg) 0 0/100% 100% no-repeat;
+}
+.content{
+    position: fixed;
+    margin-top: 310px;
+    margin-left: 40px;
+}
+.buttons-action{
+    margin-left: 5px;
+}
+.segnup-text{
+    font-size: x-small;
+    color: #a8a8a8;
+    text-align: center;
+    text-transform: none;
+}
+.signin-text{
+    font-size: x-small;
+    color: #a8a8a8;
+    text-align: center;
+    text-transform: none;
+}
+ion-input{
+    background-color: #ededed;
+    border-radius: 5px;
+    font-size: small;
+}
+.actionbutton{
+    background-color: turquoise;
+    color: black;
+    border-radius: 5px;
+    margin-left: 15px;
+    margin-right: 13px;
+    font-size: small;
+}
+ion-checkbox{
+    background: #ffce00;
+    border-radius: 5px;
+    --height:10px;
+    --width:10px;
+    --checkmark-color: white;
+    --background-checked: #ffce00;
+    --burder-color: #ffce00;
+}

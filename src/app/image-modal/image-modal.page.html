@@ -1,0 +1,17 @@
+<ion-content fullscreen>
+	<ion-fab horizontal="start" vertical="top" slot="fixed" (click)="close()">
+        <ion-fab-button color="light"><ion-icon name="close"></ion-icon></ion-fab-button>
+	</ion-fab>
+	<ion-fab *ngIf="!this.delete" horizontal="end" vertical="top" slot="fixed" (click)="downloadImage(img)">
+        <ion-fab-button color="primary"><ion-icon name="cloud-download"></ion-icon></ion-fab-button>
+	</ion-fab>
+	<ion-fab *ngIf="this.delete" horizontal="end" vertical="top" slot="fixed" (click)="confirmDelete(img)">
+        <ion-fab-button color="danger"><ion-icon name="trash"></ion-icon></ion-fab-button>
+    </ion-fab>
+
+	<ion-slides pager="true" (ionSlideDidChange)="onSlideChange()"  [options]="sliderConfig" #slider>
+		<ion-slide *ngFor="let picture of images">
+			<img src="{{picture}}">
+		</ion-slide>
+	</ion-slides>
+</ion-content>

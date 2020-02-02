@@ -1,0 +1,123 @@
+<ion-header>
+	<ion-toolbar color="tertiary">
+		<ion-title>{{ title }}</ion-title>
+		<ion-buttons slot="end">
+			<ion-button (click)="logout()">
+				<ion-icon slot="icon-only" name="log-out"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+	<ion-toolbar>
+		<ion-segment [(ngModel)]="galleryType" (ionChange)="segmentChanged($event)" color="tertiary">
+			<ion-segment-button value="uploads">
+				UPLOAD
+			</ion-segment-button>
+			<ion-segment-button value="gallery">
+				GALLERY
+			</ion-segment-button>
+		</ion-segment>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">			
+	<div [ngSwitch]="galleryType">
+		<!-- Responsive Layout with Ion Grid-->
+		<ion-grid *ngSwitchCase="'uploads'">
+			<h3 *ngIf="images.length == 0" class="ion-text-center" style="color: #CFCFCF;">Please Select Image!</h3>
+
+			<div class="progress-outer" *ngIf='isUploading && this.images.length > 0'>
+				<div class="progress-inner" [ngStyle]="{'width': + progress+'%'}">
+					{{progress}}%
+				</div>
+			</div>
+
+			<ion-list>
+				<!-- <ion-item *ngFor="let img of images; index as pos" class="ion-text-wrap">
+					<ion-thumbnail slot="start">
+						<ion-img [src]="img"></ion-img>
+					</ion-thumbnail>
+					<ion-label>File {{ pos + 1 }}</ion-label>
+					<ion-button slot="end" fill="clear" (click)="startUpload(img, pos)">
+						<ion-icon slot="icon-only" name="cloud-upload"></ion-icon>
+					</ion-button>
+					<ion-button slot="end" fill="clear" (click)="deleteImage(pos)">
+						<ion-icon slot="icon-only" name="trash"></ion-icon>
+					</ion-button>
+				</ion-item> -->
+				<ion-item *ngFor="let img of images; index as pos" class="ion-text-wrap">
+					<ion-thumbnail slot="start">
+						<ion-img [src]="img.path"></ion-img>
+					</ion-thumbnail>
+					<ion-label>{{ img.name }}</ion-label>
+					<ion-button slot="end" fill="clear" (click)="startUpload(img, pos)">
+						<ion-icon slot="icon-only" name="cloud-upload"></ion-icon>
+					</ion-button>
+					<ion-button slot="end" fill="clear" (click)="deleteImage(pos)">
+						<ion-icon slot="icon-only" name="trash"></ion-icon>
+					</ion-button>
+				</ion-item>
+			</ion-list>
+
+			<div class="ion-padding" *ngIf="this.images.length > 0">
+				<ion-button color="secondary" (click)="uploadAll()" expand="block">Upload All</ion-button>
+			</div>
+		</ion-grid>
+
+		<!-- Responsive Layout with Ion Grid-->
+		<ion-grid *ngSwitchCase="'gallery'">
+			<div *ngFor="let row of collection; index as pos">
+				<ion-card>
+					<ion-item color="primary">
+						<ion-icon name="contact" slot="start"></ion-icon>
+						<ion-label>Uploaded By: {{ row.usuario }}</ion-label>
+						<ion-button fill="outline" color="light" slot="end" (click)="openGallery(row.uuid, row.carpeta, row.usuario)">View</ion-button>
+					</ion-item>
+					
+					<ion-card-content>
+						<h4>Gallery Content: {{ row.carpeta.length }} Pictures.</h4>
+					</ion-card-content>
+				</ion-card>
+			</div>
+
+			<!-- <div *ngFor="let row of collection; index as pos">
+				<ion-chip outline color="primary" *ngIf="row.carpeta.length > 0" style="width: 100%;">
+					<ion-icon name="contact"></ion-icon>
+					<ion-label>Uploaded By: {{ row.usuario }}</ion-label>
+
+				</ion-chip>
+				<ion-row *ngIf="row.carpeta.length > 0">
+					<ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let img of row.carpeta; index as i" class="image">
+						<img src="{{img}}" tappable (click)="openPreview(img, row.uuid, row.carpeta, i)">
+					</ion-col>
+				</ion-row>
+				<ion-row *ngIf="row.carpeta.length == 0">
+					<ion-col size="12">
+						<h3 class="ion-text-center" style="color: #CFCFCF;">No images uploaded</h3>
+					</ion-col>
+				</ion-row>
+			</div> -->
+
+			<h3 *ngIf="collection.length == 0" class="ion-text-center" style="color: #CFCFCF;">No gallery created</h3>
+		</ion-grid>
+	</div>
+
+	<ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="this.galleryType == 'uploads'">
+		<ion-fab-button color="tertiary" (click)="selectImages()">
+			<ion-icon name="images"></ion-icon>
+		</ion-fab-button>
+	</ion-fab>
+
+	<!-- <ion-fab horizontal="end" vertical="bottom" slot="fixed">
+		<ion-fab-button color="tertiary">
+			<ion-icon name="add"></ion-icon>
+		</ion-fab-button>
+		<ion-fab-list side="top">
+			<ion-fab-button color="secondary" (click)="takePicture()">
+				<ion-icon name="camera"></ion-icon>
+			</ion-fab-button>
+			<ion-fab-button color="primary" (click)="selectImages()">
+				<ion-icon name="images"></ion-icon>
+			</ion-fab-button>
+		</ion-fab-list>
+	</ion-fab> -->
+</ion-content>
