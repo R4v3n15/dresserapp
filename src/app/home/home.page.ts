@@ -1,6 +1,6 @@
 // tslint:disable
-import { ActionSheetController, ToastController, LoadingController, Platform, AlertController, ModalController } from '@ionic/angular';
-import { Component, OnInit, ChangeDetectorRef, NgZone} from '@angular/core';
+import { ActionSheetController, ToastController, LoadingController, Platform, AlertController, ModalController, IonSlides } from '@ionic/angular';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone} from '@angular/core';
 import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 import { Camera, CameraOptions } 			from '@ionic-native/Camera/ngx';
 import { File, FileEntry } 					from '@ionic-native/File/ngx';
@@ -22,15 +22,25 @@ const STORAGE_KEY = 'my_images';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
+	@ViewChild('polos', { static: true }) polos: IonSlides;
+	@ViewChild('pants', { static: true }) pants: IonSlides;
+	@ViewChild('shoes', { static: true }) shoes: IonSlides;
 	loading: any;
 	options: any;
 	colected: any = [];
+	category: any = '';
+	sliderConfig 	= {
+		slidesPerView: 1.2,
+		spaceBetween: 10,
+		centeredSlides: true
+	};
+
 	public title = 'Bride & Groom';
 	public progress     : number = 0;
 	public percentage   : number = 0;
 	public images 		= [];
 	public collection 	= [];
-	public galleryType 	= 'uploads';
+	public galleryType 	= 'home';
 	public isUploading  : boolean = false;
 	public isDownloading  : boolean = false;
 	public _URL_  		: string = 'https://smartdresser.org/api/';
@@ -65,6 +75,24 @@ export class HomePage implements OnInit {
 			this.loadStoredImages();
 		});
 	}
+
+	onPolosChange(){
+		this.polos.getActiveIndex().then((indice) => {
+			console.log(indice)
+		});
+	}
+
+	onPantsChange(){
+		this.polos.getActiveIndex().then((indice) => {
+			console.log(indice)
+		});
+	}
+
+	onShoesChange(){
+		this.polos.getActiveIndex().then((indice) => {
+			console.log(indice)
+		});
+	}
 	
 	async openPreview(img, uuid, files, index){
 		const modal = await this.modalCtrl.create({
@@ -97,17 +125,19 @@ export class HomePage implements OnInit {
 	}
 
 	segmentChanged(event){
-		if(event.detail.value == 'gallery'){
+		if(event.detail.value == 'combinar'){
 			this.retrieveCollection();
 		}
 	}
 
 	retrieveCollection(){
-		this.apiService.getCollection({'url': this._URL_ + 'collection/'+this.device.uuid }).subscribe((response) => {
-			console.log('IMAGES:', response);
-			if(response['success']){
-				this.collection = response['collection'];
-			}
+		this.storage.get('userData').then((credentials: any) => {
+			this.apiService.getCollection({'url': 'collection', user: credentials.id }).subscribe((response) => {
+				console.log('IMAGES:', response);
+				if(response['success']){
+					this.collection = response['images'];
+				}
+			});
 		});
 	}
   
@@ -220,7 +250,7 @@ export class HomePage implements OnInit {
 
 	takePicture() {
 		var options: CameraOptions = {
-						quality: 70,
+						quality: 50,
 						sourceType: this.camera.PictureSourceType.CAMERA,
 						saveToPhotoAlbum: false,
 						correctOrientation: true
@@ -305,17 +335,20 @@ export class HomePage implements OnInit {
 	}
 
 	startUpload(imgEntry, index) {
+		this.chooseCategory().then((category: any) => {
+
+		});
 		this.isUploading = true;
 		this.file.resolveLocalFilesystemUrl(imgEntry.filePath)
 			.then(entry => {
-				( < FileEntry > entry).file(file => this.readFile(file, index))
+				( < FileEntry > entry).file(file => this.readFile(file, index, 'polos'))
 			})
 			.catch(err => {
 				this.presentToast('Error while reading file.');
 			});
 	}
 
-	readFile(file: any, index) {
+	readFile(file: any, index, category) {
 		const reader = new FileReader();
 		reader.onloadend = () => {
 			const formData = new FormData();
@@ -323,7 +356,12 @@ export class HomePage implements OnInit {
 								type: file.type
 							});
 			formData.append('picture', imgBlob, file.name);
-			this.uploadToServer(formData, index);
+			formData.append('folder', this.device.uuid);
+			formData.append('category', this.category);
+			this.storage.get('userData').then((credentials: any) => {
+				formData.append('user', credentials.id);
+				this.uploadToServer(formData, index);
+			});
 		};
 		reader.readAsArrayBuffer(file);
 	}
@@ -336,7 +374,7 @@ export class HomePage implements OnInit {
 			});
 		});
 
-		this.apiService.uploadPicture({'url': this._URL_+'upload/'+this.device.uuid, 'formData': formData}).subscribe((response) => {
+		this.apiService.uploadPicture({'url': 'upload', 'formData': formData}).subscribe((response) => {
 			if (response['success'] || 'Done') {
 				this.removeImage(index);
 				this.isUploading = this.images.length > 0;
@@ -349,28 +387,42 @@ export class HomePage implements OnInit {
 	}
 
 	// A C T I O N
-	async showActions(imagePath, uuid) {
+	async chooseCategory() {
 		const alert = await this.alertCtrl.create({
-						buttons: [
+						header: 'seleccionar Categoría',
+						inputs: [
 							{
-								text: 'Download',
-								handler: () => {
-									this.downloadImage(imagePath);
-								}
-							}, 
-							{
-								text: 'Delete',
-								cssClass: 'danger',
-								handler: () => {
-									this.deletePicture(imagePath, uuid);
-								}
+								label: 'Polos',
+								name: 'polos',
+								type: 'radio',
+								value: 'polo'
 							},
+							{
+								label: 'Pantalon',
+								name: 'pantalon',
+								type: 'radio',
+								value: 'pantalon'
+							},
+							{
+								label: 'Zapatos',
+								name: 'zapatos',
+								type: 'radio',
+								value: 'zapato'
+							},
+						],
+						buttons: [
 							{
 								text: 'Cancel',
 								role: 'cancel',
 								cssClass: 'secondary',
 								handler: () => {
 									console.log('Confirm Cancel: blah');
+								}
+							},
+							{
+								text: 'Guardar',
+								handler: (data) => {
+								  this.category = data.value;
 								}
 							}
 						]
@@ -382,10 +434,10 @@ export class HomePage implements OnInit {
 
 	downloadImage(imagePath) {
 		this.loader();
-		this.file.createDir(this.file.externalRootDirectory, 'mywedding', false).then((response) => {
+		this.file.createDir(this.file.externalRootDirectory, 'smertdresser', false).then((response) => {
 			console.log('MKDIR: ', response);
 		}).catch(err => {
-			console.log('Could not create directory "mywedding" ',err);
+			console.log('Could not create directory "smertdresser" ',err);
 		}); 
 		this.saveImage(imagePath);
 	}
@@ -395,7 +447,7 @@ export class HomePage implements OnInit {
 		const currentName = picture.substr(picture.lastIndexOf('/') + 1);
 		const fileTransfer: FileTransferObject = this.transfer.create();
 
-		fileTransfer.download(encodeURI(picture), this.file.externalRootDirectory + '/mywedding/' + currentName).then(
+		fileTransfer.download(encodeURI(picture), this.file.externalRootDirectory + '/smertdresser/' + currentName).then(
 			(entry) => {
 				console.log('download complete: ' + entry.toURL());
 				this.isDownloading = false;

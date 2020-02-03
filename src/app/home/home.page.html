@@ -2,12 +2,15 @@
     <ion-toolbar color="mango">
         <ion-title>{{ title }}</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="logout()">
+            <ion-button (click)="logout()" *ngIf="this.galleryType != 'combinar'">
                 <ion-icon slot="icon-only" name="log-out"></ion-icon>
+            </ion-button>
+            <ion-button (click)="logout()" *ngIf="this.galleryType == 'combinar'">
+                <ion-icon slot="icon-only" name="heart"></ion-icon>
             </ion-button>
         </ion-buttons>
     </ion-toolbar>
-    <ion-toolbar>
+    <!-- <ion-toolbar>
         <ion-segment [(ngModel)]="galleryType" (ionChange)="segmentChanged($event)" color="mango">
             <ion-segment-button value="uploads">
                 SUBIR
@@ -16,13 +19,17 @@
                 GALERÍA
             </ion-segment-button>
         </ion-segment>
-    </ion-toolbar>
+    </ion-toolbar> -->
 </ion-header>
 
 <ion-content class="ion-padding">
     <div [ngSwitch]="galleryType">
+        <ion-grid *ngSwitchCase="'home'">
+            <h3 style="color: #CFCFCF;">Home Page</h3>
+        </ion-grid>
+
         <!-- Responsive Layout with Ion Grid-->
-        <ion-grid *ngSwitchCase="'uploads'">
+        <ion-grid *ngSwitchCase="'add'">
             <h3 *ngIf="images.length == 0" class="ion-text-center" style="color: #CFCFCF;">Por favor seleccione imagen!</h3>
 
             <div class="progress-outer" *ngIf='isUploading && this.images.length > 0'>
@@ -32,18 +39,6 @@
             </div>
 
             <ion-list>
-                <!-- <ion-item *ngFor="let img of images; index as pos" class="ion-text-wrap">
-					<ion-thumbnail slot="start">
-						<ion-img [src]="img"></ion-img>
-					</ion-thumbnail>
-					<ion-label>File {{ pos + 1 }}</ion-label>
-					<ion-button slot="end" fill="clear" (click)="startUpload(img, pos)">
-						<ion-icon slot="icon-only" name="cloud-upload"></ion-icon>
-					</ion-button>
-					<ion-button slot="end" fill="clear" (click)="deleteImage(pos)">
-						<ion-icon slot="icon-only" name="trash"></ion-icon>
-					</ion-button>
-				</ion-item> -->
                 <ion-item *ngFor="let img of images; index as pos" class="ion-text-wrap">
                     <ion-thumbnail slot="start">
                         <ion-img [src]="img.path"></ion-img>
@@ -58,56 +53,56 @@
                 </ion-item>
             </ion-list>
 
-            <div class="ion-padding" *ngIf="this.images.length > 0">
+            <!-- <div class="ion-padding" *ngIf="this.images.length > 0">
                 <ion-button color="secondary" (click)="uploadAll()" expand="block">Subir todo</ion-button>
-            </div>
+            </div> -->
         </ion-grid>
 
         <!-- Responsive Layout with Ion Grid-->
-        <ion-grid *ngSwitchCase="'gallery'">
-            <div *ngFor="let row of collection; index as pos">
-                <ion-card>
-                    <ion-item color="primary">
-                        <ion-icon name="contact" slot="start"></ion-icon>
-                        <ion-label>Subido por: {{ row.usuario }}</ion-label>
-                        <ion-button fill="outline" color="light" slot="end" (click)="openGallery(row.uuid, row.carpeta, row.usuario)">View</ion-button>
-                    </ion-item>
+        <ion-grid *ngSwitchCase="'combinar'">
+            <ion-slides pager="false" (ionSlideDidChange)="onPolosChange()"  [options]="sliderConfig" #polos style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3,4,5,6]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
 
-                    <ion-card-content>
-                        <h4>Contenido de la galería: {{ row.carpeta.length }} Imágenes.</h4>
-                    </ion-card-content>
-                </ion-card>
-            </div>
+            <ion-slides pager="false" (ionSlideDidChange)="onPantsChange()"  [options]="sliderConfig" #pants style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3,4,5]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
 
-            <!-- <div *ngFor="let row of collection; index as pos">
-				<ion-chip outline color="primary" *ngIf="row.carpeta.length > 0" style="width: 100%;">
-					<ion-icon name="contact"></ion-icon>
-					<ion-label>Uploaded By: {{ row.usuario }}</ion-label>
+            <ion-slides pager="false" (ionSlideDidChange)="onShoesChange()"  [options]="sliderConfig" #shoes style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
+        </ion-grid>
 
-				</ion-chip>
-				<ion-row *ngIf="row.carpeta.length > 0">
-					<ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let img of row.carpeta; index as i" class="image">
-						<img src="{{img}}" tappable (click)="openPreview(img, row.uuid, row.carpeta, i)">
-					</ion-col>
-				</ion-row>
-				<ion-row *ngIf="row.carpeta.length == 0">
-					<ion-col size="12">
-						<h3 class="ion-text-center" style="color: #CFCFCF;">No images uploaded</h3>
-					</ion-col>
-				</ion-row>
-			</div> -->
+        
 
-            <h3 *ngIf="collection.length == 0" class="ion-text-center" style="color: #CFCFCF;">No se ha creado ninguna galería.</h3>
+        <ion-grid *ngSwitchCase="'favorito'">
+            <ion-slides pager="false" (ionSlideDidChange)="onPolosChange()"  [options]="sliderConfig" #polos style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
+
+            <ion-slides pager="false" (ionSlideDidChange)="onPantsChange()"  [options]="sliderConfig" #pants style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
+
+            <ion-slides pager="false" (ionSlideDidChange)="onShoesChange()"  [options]="sliderConfig" #shoes style="margin-bottom: 1em;">
+                <ion-slide *ngFor="let picture of [1,2,3]">
+                    <img src="https://via.placeholder.com/250">
+                </ion-slide>
+            </ion-slides>
         </ion-grid>
     </div>
 
-    <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="this.galleryType == 'uploads'">
-        <ion-fab-button color="tertiary" (click)="selectImages()">
-            <ion-icon name="images"></ion-icon>
-        </ion-fab-button>
-    </ion-fab>
-
-    <!-- <ion-fab horizontal="end" vertical="bottom" slot="fixed">
+    <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="this.galleryType == 'add'">
 		<ion-fab-button color="tertiary">
 			<ion-icon name="add"></ion-icon>
 		</ion-fab-button>
@@ -119,5 +114,28 @@
 				<ion-icon name="images"></ion-icon>
 			</ion-fab-button>
 		</ion-fab-list>
-	</ion-fab> -->
+	</ion-fab>
 </ion-content>
+
+<ion-footer>
+	<ion-toolbar>
+        <ion-segment [(ngModel)]="galleryType" (ionChange)="segmentChanged($event)" color="mango">
+            <ion-segment-button value="home">
+                <ion-icon name="home"></ion-icon>
+                HOME
+            </ion-segment-button>
+            <ion-segment-button value="add">
+                <ion-icon name="camera"></ion-icon>
+                AGREGAR
+            </ion-segment-button>
+            <ion-segment-button value="combinar">
+                <ion-icon name="body"></ion-icon>
+                COMBINAR
+            </ion-segment-button>
+            <ion-segment-button value="favorito">
+                <ion-icon name="star"></ion-icon>
+                FAVORITO
+            </ion-segment-button>
+        </ion-segment>
+	</ion-toolbar>
+</ion-footer>

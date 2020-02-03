@@ -75,7 +75,7 @@ export class ApiService {
 
 	getCollection(data) {
 		let headers = new HttpHeaders().set('Content-Type', 'application/json');
-		return this.http.post(data.url, {}, {headers});
+		return this.http.post(data.url, data, {headers});
 		// return this.http.post(_URL_+'collection/'+this.device.uuid, {}, {headers});
 	}
 
