@@ -55,7 +55,7 @@ export class SignupPage implements OnInit {
                 this.alertError('Validation Error', 'Your passwords must match.');
             }
 			let loader = await this.loadingCtrl.create({
-							message: 'Plase wait...',
+							message: 'Por favor espera...',
 						});
 			await loader.present();
 
@@ -69,19 +69,19 @@ export class SignupPage implements OnInit {
 					if(response.success){
 						this.storage.set('userData', response.credentials);
                         this.router.navigate(['/login'], {replaceUrl: true});
-                        this.alertError('You Ready', 'Log in with you new account');
+                        this.alertError('Estás listo', 'Inicia sesión con tu nueva cuenta');
 					} else {
-						this.alertError('Sign Up Fail', response.message);
+						this.alertError('El Registro fallo', response.message);
 					}
 				},
 				(fail) => {
 					console.log(fail);
 					loader.dismiss();
-					this.alertError('Timeout Error', 'Please check if your Wifi connection.');
+					this.alertError('El Registro fallo', 'Por favor verifique si su conexión Wifi.');
 				}
 			);
 		} else {
-			this.alertError('Error', 'Please provide a username, email and password to continue.');
+			this.alertError('Error', 'Proporcione un nombre de usuario, correo electrónico y contraseña para continuar.');
 		}
 	}
 

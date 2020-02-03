@@ -91,7 +91,7 @@ export class ImageModalPage implements OnInit {
 	async confirmDelete(picture){
 		const alert = await this.alertCtrl.create({
 						header: 'Delete Picture',
-						message: 'Are you sure to delete this picture?',
+						message: '¿Estás seguro de eliminar esta imagen?',
 						buttons: [ 
 							{
 								text: 'Cancel',
@@ -137,12 +137,12 @@ export class ImageModalPage implements OnInit {
 				this.presentToast(response['message']);
 			},
 			(error) => {
-				console.log('Something went wrong.', error);
+				console.log('Algo salió mal.', error);
 			}
 		);
 	}
 
-	async loader(texto = 'Plase wait...') {
+	async loader(texto = 'Por favor espera...') {
 		this.loading = await this.loadingCtrl.create({
 							message: texto,
 						});

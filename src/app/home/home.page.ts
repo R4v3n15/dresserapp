@@ -242,7 +242,7 @@ export class HomePage implements OnInit {
 					this.ref.detectChanges();
 				},
 				(error) => {
-					this.presentToast('Error while storing file.');
+					this.presentToast('Error al almacenar el archivo.');
 				}
 			);
 		});
@@ -254,7 +254,7 @@ export class HomePage implements OnInit {
 		},
 		(error) => {
 			console.log(error);
-			this.presentToast('Error while storing file.');
+			this.presentToast('Error al almacenar el archivo.');
 		});
 	}
 
@@ -453,7 +453,7 @@ export class HomePage implements OnInit {
 	// L O G O U T
 	async logout(){
 		const alert = await this.alertCtrl.create({
-						message: 'Are you sure to log out? All your data will be deleted.',
+						message: '¿Estás seguro de cerrar sesión? Todos sus datos serán eliminados.',
 						buttons: [
 							{
 								text: 'Log Out',

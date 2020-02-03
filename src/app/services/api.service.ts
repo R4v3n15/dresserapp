@@ -150,7 +150,7 @@ export class ApiService {
 	|--------------------------------------------------------------------------------------------
 	*/
 
-    async loader(texto = 'Uploading image...') {
+    async loader(texto = 'Subiendo imagen...') {
       this.loading = await this.loadingCtrl.create({
                         message: texto,
                       });

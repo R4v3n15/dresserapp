@@ -30,7 +30,7 @@ export class LoginPage implements OnInit {
 	async authUser() {
 		if (this.password  && this.username && this.username.length > 3 && this.password.length > 3) {
 			let loader = await this.loadingCtrl.create({
-							message: 'Plase wait...',
+							message: 'Por favor espere...',
 						});
 			await loader.present();
 
@@ -55,11 +55,11 @@ export class LoginPage implements OnInit {
 				(fail) => {
 					console.log(fail);
 					loader.dismiss();
-					this.alertError('Timeout Error', 'Please check your Wifi connection.');
+					this.alertError('Error de tiempo de espera', 'Por favor verifique su conexión Wifi.');
 				}
 			);
 		} else {
-			this.alertError('Error', 'Please provide a valid username and password to continue.');
+			this.alertError('Error', 'Proporcione un nombre de usuario y contraseña válidos para continuar.');
 		}
 	}
 
