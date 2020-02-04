@@ -2,11 +2,14 @@
     <ion-toolbar color="mango">
         <ion-title>{{ title }}</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="logout()" *ngIf="this.galleryType != 'combinar'">
+            <ion-button (click)="logout()" *ngIf="this.galleryType == 'home' || this.galleryType == 'add'">
                 <ion-icon slot="icon-only" name="log-out"></ion-icon>
             </ion-button>
-            <ion-button (click)="logout()" *ngIf="this.galleryType == 'combinar'">
-                <ion-icon slot="icon-only" name="heart"></ion-icon>
+            <ion-button (click)="saveCollection()" *ngIf="this.galleryType == 'combinar'">
+                <ion-icon slot="icon-only" name="heart" color="tertiary"></ion-icon>
+            </ion-button>
+            <ion-button (click)="saveCollection()" *ngIf="this.galleryType == 'favorito'">
+                <ion-icon slot="icon-only" name="trash" color="danger"></ion-icon>
             </ion-button>
         </ion-buttons>
     </ion-toolbar>
@@ -24,12 +27,12 @@
 
 <ion-content class="ion-padding">
     <div [ngSwitch]="galleryType">
-        <ion-grid *ngSwitchCase="'home'">
+        <div *ngSwitchCase="'home'">
             <h3 style="color: #CFCFCF;">Home Page</h3>
-        </ion-grid>
+        </div>
 
         <!-- Responsive Layout with Ion Grid-->
-        <ion-grid *ngSwitchCase="'add'">
+        <div *ngSwitchCase="'add'">
             <h3 *ngIf="images.length == 0" class="ion-text-center" style="color: #CFCFCF;">Por favor seleccione imagen!</h3>
 
             <div class="progress-outer" *ngIf='isUploading && this.images.length > 0'>
@@ -44,7 +47,7 @@
                         <ion-img [src]="img.path"></ion-img>
                     </ion-thumbnail>
                     <ion-label>{{ img.name }}</ion-label>
-                    <ion-button slot="end" fill="clear" (click)="startUpload(img, pos)">
+                    <ion-button slot="end" fill="clear" (click)="chooseCategory(img, pos)">
                         <ion-icon slot="icon-only" name="cloud-upload"></ion-icon>
                     </ion-button>
                     <ion-button slot="end" fill="clear" (click)="deleteImage(pos)">
@@ -52,54 +55,52 @@
                     </ion-button>
                 </ion-item>
             </ion-list>
-
-            <!-- <div class="ion-padding" *ngIf="this.images.length > 0">
-                <ion-button color="secondary" (click)="uploadAll()" expand="block">Subir todo</ion-button>
-            </div> -->
-        </ion-grid>
+        </div>
 
         <!-- Responsive Layout with Ion Grid-->
-        <ion-grid *ngSwitchCase="'combinar'">
-            <ion-slides pager="false" (ionSlideDidChange)="onPolosChange()"  [options]="sliderConfig" #polos style="margin-bottom: 1em;">
-                <ion-slide *ngFor="let picture of [1,2,3,4,5,6]">
-                    <img src="https://via.placeholder.com/250">
+        <div *ngSwitchCase="'combinar'">
+            <ion-slides pager="false" #polos (ionSlideDidChange)="onPolosChange(polos)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+                <ion-slide *ngFor="let polo of polos_collection">
+                    <img [src]="polo.path">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" (ionSlideDidChange)="onPantsChange()"  [options]="sliderConfig" #pants style="margin-bottom: 1em;">
-                <ion-slide *ngFor="let picture of [1,2,3,4,5]">
-                    <img src="https://via.placeholder.com/250">
+            <ion-slides pager="false" #pants (ionSlideDidChange)="onPantsChange(pants)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+                <ion-slide *ngFor="let pant of pants_collection">
+                    <img [src]="pant.path">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" (ionSlideDidChange)="onShoesChange()"  [options]="sliderConfig" #shoes style="margin-bottom: 1em;">
-                <ion-slide *ngFor="let picture of [1,2,3]">
-                    <img src="https://via.placeholder.com/250">
+            <ion-slides pager="false" #shoes (ionSlideDidChange)="onShoesChange(shoes)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+                <ion-slide *ngFor="let shoe of shoes_collection">
+                    <img [src]="shoe.path">
                 </ion-slide>
             </ion-slides>
-        </ion-grid>
+        </div>
 
         
 
-        <ion-grid *ngSwitchCase="'favorito'">
-            <ion-slides pager="false" (ionSlideDidChange)="onPolosChange()"  [options]="sliderConfig" #polos style="margin-bottom: 1em;">
+        <div *ngSwitchCase="'favorito'">
+            <div *ngFor="let item of collection; index as j">
+            </div>
+            <ion-slides pager="false" (ionSlideDidChange)="onPolosFavChange()"  [options]="sliderConfig" #fav_polos style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let picture of [1,2,3]">
                     <img src="https://via.placeholder.com/250">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" (ionSlideDidChange)="onPantsChange()"  [options]="sliderConfig" #pants style="margin-bottom: 1em;">
+            <ion-slides pager="false" (ionSlideDidChange)="onPantsFavChange()"  [options]="sliderConfig" #fav_pants style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let picture of [1,2,3]">
                     <img src="https://via.placeholder.com/250">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" (ionSlideDidChange)="onShoesChange()"  [options]="sliderConfig" #shoes style="margin-bottom: 1em;">
+            <ion-slides pager="false" (ionSlideDidChange)="onShoesFavChange()"  [options]="sliderConfig" #fav_shoes style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let picture of [1,2,3]">
                     <img src="https://via.placeholder.com/250">
                 </ion-slide>
             </ion-slides>
-        </ion-grid>
+        </div>
     </div>
 
     <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="this.galleryType == 'add'">

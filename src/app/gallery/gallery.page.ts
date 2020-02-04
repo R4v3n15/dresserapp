@@ -16,11 +16,11 @@ export class GalleryPage implements OnInit {
 
     constructor(
 		private modalCtrl: ModalController,
-		private params: NavParams
+		// private params: NavParams
 	) { 
-		this.name = this.params.get('user');
-		this.uuid = this.params.get('uuid');
-		this.images = this.params.get('images');
+		// this.name = this.params.get('user');
+		// this.uuid = this.params.get('uuid');
+		// this.images = this.params.get('images');
 	}
 
     ngOnInit() {

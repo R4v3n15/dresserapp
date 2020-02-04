@@ -61,7 +61,7 @@ export class ApiService {
 	*/
 	uploadPicture(data) {
 		var formData: FormData = data.formData;
-		let params = new HttpRequest('POST', data.url, formData, { 
+		let params = new HttpRequest('POST', _URL_+data.url, formData, { 
 						responseType: 'arraybuffer',
 						reportProgress: true
 					});
@@ -75,12 +75,17 @@ export class ApiService {
 
 	getCollection(data) {
 		let headers = new HttpHeaders().set('Content-Type', 'application/json');
-		return this.http.post(data.url, data, {headers});
+		return this.http.post(_URL_+data.url, data, {headers});
 		// return this.http.post(_URL_+'collection/'+this.device.uuid, {}, {headers});
 	}
 
+	saveCollection(data) {
+		let headers = new HttpHeaders().set('Content-Type', 'application/json');
+		return this.http.post(_URL_+data.url, data.data, {headers});
+	}
 
-	useCollection(formData: FormData) {
+
+	userCollection(formData: FormData) {
 		let params = new HttpRequest('POST', _URL_+'collection/'+this.device.uuid, formData, { 
 						responseType: 'arraybuffer',
 						reportProgress: true
@@ -95,7 +100,7 @@ export class ApiService {
 
 	deletePicture(data) {
 		let headers = new HttpHeaders().set('Content-Type', 'application/json');
-		return this.http.post(data.url, {}, {headers});
+		return this.http.post(_URL_+data.url, {}, {headers});
 	}
 
 

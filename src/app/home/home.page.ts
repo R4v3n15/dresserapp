@@ -1,6 +1,6 @@
 // tslint:disable
 import { ActionSheetController, ToastController, LoadingController, Platform, AlertController, ModalController, IonSlides } from '@ionic/angular';
-import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone} from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, NgZone, ElementRef} from '@angular/core';
 import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 import { Camera, CameraOptions } 			from '@ionic-native/Camera/ngx';
 import { File, FileEntry } 					from '@ionic-native/File/ngx';
@@ -22,16 +22,34 @@ const STORAGE_KEY = 'my_images';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-	@ViewChild('polos', { static: true }) polos: IonSlides;
+	@ViewChild('polos', { static: true }) polos: ElementRef;
 	@ViewChild('pants', { static: true }) pants: IonSlides;
 	@ViewChild('shoes', { static: true }) shoes: IonSlides;
+	@ViewChild('fav_polos', { static: true }) fav_polos: IonSlides;
+	@ViewChild('fav_pants', { static: true }) fav_pants: IonSlides;
+	@ViewChild('fav_shoes', { static: true }) fav_shoes: IonSlides;
 	loading: any;
 	options: any;
 	colected: any = [];
 	category: any = '';
+
+	// Uploads
+	polos_collection: any = [];
+	pants_collection: any = [];
+	shoes_collection: any = [];
+
+	// Index Selected
+	polo_index: number = 0;
+	pant_index: number = 0;
+	shoe_index: number = 0;
+	// Selected
+	polo_active: number = 0;
+	pant_active: number = 0;
+	shoe_active: number = 0;
+
 	sliderConfig 	= {
-		slidesPerView: 1.2,
-		spaceBetween: 10,
+		slidesPerView: 1.4,
+		spaceBetween: 5,
 		centeredSlides: true
 	};
 
@@ -43,7 +61,6 @@ export class HomePage implements OnInit {
 	public galleryType 	= 'home';
 	public isUploading  : boolean = false;
 	public isDownloading  : boolean = false;
-	public _URL_  		: string = 'https://smartdresser.org/api/';
 
 	constructor(
 		private actionSheetController: ActionSheetController,
@@ -76,20 +93,58 @@ export class HomePage implements OnInit {
 		});
 	}
 
-	onPolosChange(){
-		this.polos.getActiveIndex().then((indice) => {
+	// COMBINAR
+	onPolosChange(slidePolos: IonSlides){
+		slidePolos.getActiveIndex().then((indice) => {
+			this.polo_index = indice;
+		});
+	}
+
+	onPantsChange(slidePants: IonSlides){
+		slidePants.getActiveIndex().then((indice) => {
+			this.pant_index = indice;
+		});
+	}
+
+	onShoesChange(slideShoes: IonSlides){
+		slideShoes.getActiveIndex().then((indice) => {
+			this.shoe_index = indice;
+		});
+	}
+
+	saveCollection(){
+		this.loader();
+		this.storage.get('userData').then((credentials: any) => {
+			this.polo_active = this.polos_collection[this.polo_index].idPicture;
+			this.pant_active = this.pants_collection[this.pant_index].idPicture;
+			this.shoe_active = this.shoes_collection[this.shoe_index].idPicture;
+
+			let params = {polo: this.polo_active, pant: this.pant_active, shoe: this.shoe_active, user: credentials.id};
+			this.apiService.saveCollection({'url': 'new_collection', data: params }).subscribe((response: any) => {
+				console.log('SAVE:', response);
+				setTimeout(() => {
+					this.loading.dismiss();
+					this.presentToast(response.message);
+				}, 1000);
+			});
+		});
+	}
+
+	// FAVORITOS
+	onPolosFavChange(){
+		this.fav_polos.getActiveIndex().then((indice) => {
 			console.log(indice)
 		});
 	}
 
-	onPantsChange(){
-		this.polos.getActiveIndex().then((indice) => {
+	onPantsFavChange(){
+		this.fav_pants.getActiveIndex().then((indice) => {
 			console.log(indice)
 		});
 	}
 
-	onShoesChange(){
-		this.polos.getActiveIndex().then((indice) => {
+	onShoesFavChange(){
+		this.fav_shoes.getActiveIndex().then((indice) => {
 			console.log(indice)
 		});
 	}
@@ -126,16 +181,31 @@ export class HomePage implements OnInit {
 
 	segmentChanged(event){
 		if(event.detail.value == 'combinar'){
-			this.retrieveCollection();
+			this.retrieveCollection('collection');
+		}
+
+		if(event.detail.value == 'favorito'){
+			this.retrieveCollection('get_collection');
 		}
 	}
 
-	retrieveCollection(){
+	retrieveCollection(_url){
+		this.loader();
 		this.storage.get('userData').then((credentials: any) => {
-			this.apiService.getCollection({'url': 'collection', user: credentials.id }).subscribe((response) => {
-				console.log('IMAGES:', response);
+			this.apiService.getCollection({'url': _url, user: credentials.id }).subscribe((response) => {
 				if(response['success']){
-					this.collection = response['images'];
+					if(_url == 'collection'){
+						this.polos_collection = response['polos'];
+						this.pants_collection = response['pants'];
+						this.shoes_collection = response['shoes'];
+					} else {
+						this.collection = response['collection'];
+					}
+					if(this.loading != undefined){
+						setTimeout(() => {
+							this.loading.dismiss();
+						}, 1000);
+					}
 				}
 			});
 		});
@@ -327,21 +397,18 @@ export class HomePage implements OnInit {
 				const pictures = JSON.parse(images);
 				pictures.map((picture, i) => {
 					setTimeout( async () => {
-						await this.startUpload(picture, i);
+						await this.startUpload(picture, i, this.category);
 					}, 3000);
 				});
 			}
 		});
 	}
 
-	startUpload(imgEntry, index) {
-		this.chooseCategory().then((category: any) => {
-
-		});
+	startUpload(imgEntry, index, category) {
 		this.isUploading = true;
 		this.file.resolveLocalFilesystemUrl(imgEntry.filePath)
 			.then(entry => {
-				( < FileEntry > entry).file(file => this.readFile(file, index, 'polos'))
+				( < FileEntry > entry).file(file => this.readFile(file, index, category))
 			})
 			.catch(err => {
 				this.presentToast('Error while reading file.');
@@ -357,7 +424,7 @@ export class HomePage implements OnInit {
 							});
 			formData.append('picture', imgBlob, file.name);
 			formData.append('folder', this.device.uuid);
-			formData.append('category', this.category);
+			formData.append('category', category);
 			this.storage.get('userData').then((credentials: any) => {
 				formData.append('user', credentials.id);
 				this.uploadToServer(formData, index);
@@ -387,7 +454,7 @@ export class HomePage implements OnInit {
 	}
 
 	// A C T I O N
-	async chooseCategory() {
+	async chooseCategory(image, index) {
 		const alert = await this.alertCtrl.create({
 						header: 'seleccionar Categoría',
 						inputs: [
@@ -395,19 +462,19 @@ export class HomePage implements OnInit {
 								label: 'Polos',
 								name: 'polos',
 								type: 'radio',
-								value: 'polo'
+								value: 'polos'
 							},
 							{
 								label: 'Pantalon',
-								name: 'pantalon',
+								name: 'pantalones',
 								type: 'radio',
-								value: 'pantalon'
+								value: 'pantalones'
 							},
 							{
 								label: 'Zapatos',
 								name: 'zapatos',
 								type: 'radio',
-								value: 'zapato'
+								value: 'zapatos'
 							},
 						],
 						buttons: [
@@ -422,7 +489,8 @@ export class HomePage implements OnInit {
 							{
 								text: 'Guardar',
 								handler: (data) => {
-								  this.category = data.value;
+									this.category = data; // Esta demás
+									this.startUpload(image, index, data);
 								}
 							}
 						]
@@ -482,10 +550,10 @@ export class HomePage implements OnInit {
 	async deletePicture(picture, uuid){
 		if(this.device.uuid == uuid) {
 			const currentName = picture.substr(picture.lastIndexOf('/') + 1);
-			await this.apiService.deletePicture({'url': this._URL_+'item/'+this.device.uuid+'/'+currentName+'/delete', 'file': currentName}).subscribe(
+			await this.apiService.deletePicture({'url': 'delete/image', 'file': currentName, 'user': 'user'}).subscribe(
 				(response) => {
 					console.log(response);
-					this.retrieveCollection();
+					this.retrieveCollection('collection');
 				},
 				(error) => {
 					console.log('Something went wrong.', error);
@@ -505,7 +573,7 @@ export class HomePage implements OnInit {
 	// L O G O U T
 	async logout(){
 		const alert = await this.alertCtrl.create({
-						message: '¿Estás seguro de cerrar sesión? Todos sus datos serán eliminados.',
+						message: '¿Estás seguro de cerrar sesión?',
 						buttons: [
 							{
 								text: 'Log Out',

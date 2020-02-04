@@ -1,3 +1,4 @@
+// tslint:disable
 import { LoadingController, AlertController } from '@ionic/angular';
 import { Component, OnInit }    from '@angular/core';
 import { finalize, timeout } 	from 'rxjs/operators';
@@ -5,6 +6,7 @@ import { Storage }              from '@ionic/storage';
 import { Router }               from '@angular/router';
 
 import { ApiService }           from '../services/api.service';
+import { Device } from '@ionic-native/device/ngx';
 
 @Component({
     selector: 'app-signup',
@@ -14,6 +16,7 @@ import { ApiService }           from '../services/api.service';
 export class SignupPage implements OnInit {
     postData = {
                     url: 'signup',
+                    uuid: '',
                     name: '',
                     username: '',
                     email: '',
@@ -26,7 +29,8 @@ export class SignupPage implements OnInit {
         private alertCtrl: AlertController,
         private apiService: ApiService,
         private storage: Storage,
-        private router: Router
+        private router: Router,
+        private device: Device
     ) {}
 
     ngOnInit() {
@@ -51,6 +55,7 @@ export class SignupPage implements OnInit {
 
     async registerUser() {
 		if (this.validateInputs()) {
+            this.postData.uuid = this.device.uuid;
             if(this.postData.password != this.postData.password_confirmation) {
                 this.alertError('Validation Error', 'Your passwords must match.');
             }

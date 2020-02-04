@@ -13,7 +13,7 @@
     <ion-grid>
         <ion-row *ngIf="images.length > 0">
             <ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let img of images; index as i" class="image">
-                <img src="{{img}}" tappable (click)="openPreview(i)">
+                <img src="{{img}}" tappable (click)="openPreview(i, img)">
             </ion-col>
         </ion-row>
 
