@@ -83,13 +83,15 @@
         <div *ngSwitchCase="'favorito'">
             <div *ngFor="let item of collection; index as j">
             </div>
-            <ion-slides pager="false" (ionSlideDidChange)="onPolosFavChange()"  [options]="sliderConfig" #fav_polos style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
-                <ion-slide *ngFor="let picture of [1,2,3]">
-                    <img src="https://via.placeholder.com/250">
+            <ion-slides pager="false" (ionSlideDidChange)="onPolosFavChange()"  [options]="sliderConfig" #fav_polos style="margin-bottom: 1em; max-height: 275vh; overflow-y: hidden;">
+                <ion-slide *ngFor="let item of collection; index as j">
+                    <img [src]="item.polo_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
+                    <img [src]="item.pant_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
+                    <img [src]="item.shoe_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" (ionSlideDidChange)="onPantsFavChange()"  [options]="sliderConfig" #fav_pants style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+            <!-- <ion-slides pager="false" (ionSlideDidChange)="onPantsFavChange()"  [options]="sliderConfig" #fav_pants style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let picture of [1,2,3]">
                     <img src="https://via.placeholder.com/250">
                 </ion-slide>
@@ -99,7 +101,7 @@
                 <ion-slide *ngFor="let picture of [1,2,3]">
                     <img src="https://via.placeholder.com/250">
                 </ion-slide>
-            </ion-slides>
+            </ion-slides> -->
         </div>
     </div>
 
