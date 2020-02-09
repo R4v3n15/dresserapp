@@ -25,9 +25,7 @@ export class HomePage implements OnInit {
 	@ViewChild('polos', { static: true }) polos: ElementRef;
 	@ViewChild('pants', { static: true }) pants: IonSlides;
 	@ViewChild('shoes', { static: true }) shoes: IonSlides;
-	@ViewChild('fav_polos', { static: true }) fav_polos: IonSlides;
-	@ViewChild('fav_pants', { static: true }) fav_pants: IonSlides;
-	@ViewChild('fav_shoes', { static: true }) fav_shoes: IonSlides;
+	@ViewChild('favoritos', { static: true }) favoritos: IonSlides;
 	loading: any;
 	options: any;
 	colected: any = [];
@@ -37,6 +35,7 @@ export class HomePage implements OnInit {
 	polos_collection: any = [];
 	pants_collection: any = [];
 	shoes_collection: any = [];
+	favos_collection: any = [];
 
 	// Index Selected
 	polo_index: number = 0;
@@ -46,10 +45,24 @@ export class HomePage implements OnInit {
 	polo_active: number = 0;
 	pant_active: number = 0;
 	shoe_active: number = 0;
+	favo_active: number = 0;
 
 	sliderConfig 	= {
-		slidesPerView: 1.4,
-		spaceBetween: 5,
+		slidesPerView: 1.3,
+		spaceBetween: 4,
+		centeredSlides: true
+	};
+
+	favsConfig 	= {
+		slidesPerView: 1.2,
+		spaceBetween: 4,
+		centeredSlides: true
+	};
+
+	slideConfig 	= {
+		slidesPerView: 1.2,
+		slidesPerColumn: 4,
+		spaceBetween: 1,
 		centeredSlides: true
 	};
 
@@ -58,7 +71,8 @@ export class HomePage implements OnInit {
 	public percentage   : number = 0;
 	public images 		= [];
 	public collection 	= [];
-	public galleryType 	= 'home';
+	public galleryType 	= 'add';
+	public imageSection = 'add';
 	public isUploading  : boolean = false;
 	public isDownloading  : boolean = false;
 
@@ -130,24 +144,49 @@ export class HomePage implements OnInit {
 		});
 	}
 
+	async deleteCollection(){
+		const alert = await this.alertCtrl.create({
+						message: 'Eliminar conjunto de mis favoritos',
+						buttons: [
+							{
+								text: 'Cancelar',
+								role: 'cancel',
+								cssClass: 'secondary',
+								handler: () => {
+									console.log('Naah');
+								}
+							}, 
+							{
+								text: 'Eliminar',
+								cssClass: 'danger',
+								handler: () => {
+									this.loader();
+									this.storage.get('userData').then((credentials: any) => {
+										let conjunto = this.collection[this.favo_active].idConjunto;
+										let params = {collection: conjunto, user: credentials.id};
+										this.apiService.deleteCollection({'url': 'delete/collection', data: params }).subscribe((response: any) => {
+											if(response.success){
+												this.loading.dismiss();
+												this.retrieveCollection('get_collection');
+											}
+										});
+									});
+								}
+							}
+						]
+					});
+			await alert.present();
+
+	}
+
 	// FAVORITOS
-	onPolosFavChange(){
-		this.fav_polos.getActiveIndex().then((indice) => {
-			console.log(indice)
+	onFavoritosChange(slidesFavoritos: IonSlides){
+		slidesFavoritos.getActiveIndex().then((indice) => {
+			console.log(indice);
+			this.favo_active = indice;
 		});
 	}
 
-	onPantsFavChange(){
-		this.fav_pants.getActiveIndex().then((indice) => {
-			console.log(indice)
-		});
-	}
-
-	onShoesFavChange(){
-		this.fav_shoes.getActiveIndex().then((indice) => {
-			console.log(indice)
-		});
-	}
 	
 	async openPreview(img, uuid, files, index){
 		const modal = await this.modalCtrl.create({
@@ -187,6 +226,17 @@ export class HomePage implements OnInit {
 		if(event.detail.value == 'favorito'){
 			this.retrieveCollection('get_collection');
 		}
+
+		if(event.detail.value == 'add'){
+			this.imageSection = 'add';
+		}
+	}
+
+	onViewChanged(event){
+		if(event.detail.value == 'gallery' ){
+			this.retrieveCollection('collection');
+		}
+		this.galleryType = event.detail.value;
 	}
 
 	retrieveCollection(_url){
@@ -200,12 +250,9 @@ export class HomePage implements OnInit {
 						this.shoes_collection = response['shoes'];
 					} else {
 						this.collection = response['collection'];
+						this.favos_collection = response['images']
 					}
-					if(this.loading != undefined){
-						setTimeout(() => {
-							this.loading.dismiss();
-						}, 1000);
-					}
+					this.loading.dismiss();
 				}
 			});
 		});
@@ -445,6 +492,7 @@ export class HomePage implements OnInit {
 			if (response['success'] || 'Done') {
 				this.removeImage(index);
 				this.isUploading = this.images.length > 0;
+				this.progress 	 = 0;
 				this.presentToast('File upload complete.');
 				this.ref.detectChanges();
 			} else {
@@ -547,27 +595,39 @@ export class HomePage implements OnInit {
 		});
 	}
 
-	async deletePicture(picture, uuid){
-		if(this.device.uuid == uuid) {
-			const currentName = picture.substr(picture.lastIndexOf('/') + 1);
-			await this.apiService.deletePicture({'url': 'delete/image', 'file': currentName, 'user': 'user'}).subscribe(
-				(response) => {
-					console.log(response);
-					this.retrieveCollection('collection');
-				},
-				(error) => {
-					console.log('Something went wrong.', error);
-				}
-			);
-		} else {
-			const alert = await this.alertCtrl.create({
-							header: 'Action Not Allowed',
-							message: 'You can delete only your own pictures.',
-							buttons: ['OK']
-						});
-
+	async deletePicture(picture){
+		const alert = await this.alertCtrl.create({
+						message: 'Eliminar prenda de galería.',
+						buttons: [
+							{
+								text: 'Cancelar',
+								role: 'cancel',
+								cssClass: 'secondary',
+								handler: () => {
+									console.log('Naah');
+								}
+							}, 
+							{
+								text: 'Eliminar',
+								cssClass: 'danger',
+								handler: () => {
+									this.loader();
+									this.apiService.deletePicture({'url': 'delete/image', 'data': picture}).subscribe(
+										(response: any) => {
+											if(response.success){
+												this.retrieveCollection('collection');
+											}
+											this.loading.dismiss();
+										},
+										(error) => {
+											console.log('Something went wrong.', error);
+										}
+									);
+								}
+							}
+						]
+					});
 			await alert.present();
-		}
 	}
 
 	// L O G O U T

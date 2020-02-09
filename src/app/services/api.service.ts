@@ -98,9 +98,14 @@ export class ApiService {
 			);
 	}
 
+	deleteCollection(data) {
+		let headers = new HttpHeaders().set('Content-Type', 'application/json');
+		return this.http.post(_URL_+data.url, data.data, {headers});
+	}
+
 	deletePicture(data) {
 		let headers = new HttpHeaders().set('Content-Type', 'application/json');
-		return this.http.post(_URL_+data.url, {}, {headers});
+		return this.http.post(_URL_+data.url, data.data, {headers});
 	}
 
 

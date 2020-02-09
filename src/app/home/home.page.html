@@ -5,27 +5,32 @@
             <ion-button (click)="logout()" *ngIf="this.galleryType == 'home' || this.galleryType == 'add'">
                 <ion-icon slot="icon-only" name="log-out"></ion-icon>
             </ion-button>
-            <ion-button (click)="saveCollection()" *ngIf="this.galleryType == 'combinar'">
-                <ion-icon slot="icon-only" name="heart" color="tertiary"></ion-icon>
-            </ion-button>
-            <ion-button (click)="saveCollection()" *ngIf="this.galleryType == 'favorito'">
-                <ion-icon slot="icon-only" name="trash" color="danger"></ion-icon>
-            </ion-button>
         </ion-buttons>
     </ion-toolbar>
-    <!-- <ion-toolbar>
-        <ion-segment [(ngModel)]="galleryType" (ionChange)="segmentChanged($event)" color="mango">
-            <ion-segment-button value="uploads">
-                SUBIR
+    <ion-toolbar *ngIf="this.galleryType=='add' || this.imageSection=='gallery'">
+        <ion-segment [(ngModel)]="imageSection" (ionChange)="onViewChanged($event)" color="mango">
+            <ion-segment-button value="add">
+                SUBIR PRENDAS
             </ion-segment-button>
             <ion-segment-button value="gallery">
                 GALERÍA
             </ion-segment-button>
         </ion-segment>
-    </ion-toolbar> -->
+    </ion-toolbar>
 </ion-header>
 
+
 <ion-content class="ion-padding">
+    <ion-fab horizontal="center" vertical="top" slot="fixed" edge *ngIf="this.galleryType == 'combinar'">
+        <ion-fab-button color="tertiary" (click)="saveCollection()">
+            <ion-icon name="heart"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+    <ion-fab horizontal="center" vertical="top" slot="fixed" edge *ngIf="this.galleryType == 'favorito'">
+        <ion-fab-button color="danger" (click)="deleteCollection()">
+            <ion-icon name="trash"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
     <div [ngSwitch]="galleryType">
         <div *ngSwitchCase="'home'">
             <h3 style="color: #CFCFCF;">Home Page</h3>
@@ -57,56 +62,98 @@
             </ion-list>
         </div>
 
+        <div *ngSwitchCase="'gallery'">
+            <ion-grid>
+                <ion-row *ngIf="polos_collection.length > 0">
+                    <ion-chip color="primary" style="width: 100%;">
+                        <ion-label>POLOS</ion-label>
+                    </ion-chip>
+                    <ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let polo of polos_collection; index as i" class="image">
+                        <ion-card>
+                            <img [src]="polo.path">
+                            <ion-item>
+                                <ion-button fill="outline" expand="block" color="danger" (click)="deletePicture(polo)">Eliminar</ion-button>
+                            </ion-item>
+                        </ion-card>
+                    </ion-col>
+                </ion-row>
+
+                <ion-row *ngIf="pants_collection.length > 0">
+                    <ion-chip color="primary" style="width: 100%;">
+                        <ion-label>PANTALONES</ion-label>
+                    </ion-chip>
+                    <ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let pant of pants_collection; index as i" class="image">
+                        <ion-card>
+                            <img [src]="pant.path">
+                            <ion-item>
+                                <ion-button fill="outline" expand="block" color="danger" (click)="deletePicture(pant)">Eliminar</ion-button>
+                            </ion-item>
+                        </ion-card>
+                    </ion-col>
+                </ion-row>
+
+                <ion-row *ngIf="shoes_collection.length > 0">
+                    <ion-chip color="primary" style="width: 100%;">
+                        <ion-label>ZAPATOS</ion-label>
+                    </ion-chip>
+                    <ion-col size="6" size-lg="3" size-md="4" size-sm="6" *ngFor="let shoe of shoes_collection; index as i" class="image">
+                        <ion-card>
+                            <img [src]="shoe.path">
+                            <ion-item>
+                                <ion-button fill="outline" expand="block" color="danger" (click)="deletePicture(shoe)">Eliminar</ion-button>
+                            </ion-item>
+                        </ion-card>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+
+            <h3 *ngIf="polos_collection.length == 0 && pants_collection.length == 0 && shoes_collection.length == 0" 
+                class="ion-text-center" style="color: #CFCFCF;">Aún no hay prendas en su gallería</h3>
+		</div>
+
         <!-- Responsive Layout with Ion Grid-->
         <div *ngSwitchCase="'combinar'">
-            <ion-slides pager="false" #polos (ionSlideDidChange)="onPolosChange(polos)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+            <ion-slides pager="false" #polos (ionSlideDidChange)="onPolosChange(polos)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 0.5em; max-height: 26vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let polo of polos_collection">
                     <img [src]="polo.path">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" #pants (ionSlideDidChange)="onPantsChange(pants)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+            <ion-slides pager="false" #pants (ionSlideDidChange)="onPantsChange(pants)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 0.5em; max-height: 26vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let pant of pants_collection">
                     <img [src]="pant.path">
                 </ion-slide>
             </ion-slides>
 
-            <ion-slides pager="false" #shoes (ionSlideDidChange)="onShoesChange(shoes)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
+            <ion-slides pager="false" #shoes (ionSlideDidChange)="onShoesChange(shoes)"  [options]="sliderConfig" class="sliders" style="margin-bottom: 0.5em; max-height: 26vh; overflow-y: hidden;">
                 <ion-slide *ngFor="let shoe of shoes_collection">
                     <img [src]="shoe.path">
                 </ion-slide>
             </ion-slides>
+
+            <h3 *ngIf="polos_collection.length == 0 && pants_collection.length == 0 && shoes_collection.length == 0" 
+                class="ion-text-center" style="color: #CFCFCF;">Aún no hay prendas en su gallería</h3>
         </div>
 
         
-
         <div *ngSwitchCase="'favorito'">
-            <div *ngFor="let item of collection; index as j">
-            </div>
-            <ion-slides pager="false" (ionSlideDidChange)="onPolosFavChange()"  [options]="sliderConfig" #fav_polos style="margin-bottom: 1em; max-height: 275vh; overflow-y: hidden;">
-                <ion-slide *ngFor="let item of collection; index as j">
-                    <img [src]="item.polo_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
-                    <img [src]="item.pant_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
-                    <img [src]="item.shoe_rel.path" style="margin-bottom: 1em; display:block; height: 30%;">
+            <ion-slides pager="true" #favoritos direction="vertical" (ionSlideDidChange)="onFavoritosChange(favoritos)" [options]="slideConfig">
+                <ion-slide *ngFor="let item of favos_collection" style="max-height: 26vh; overflow-y: hidden;">
+                    <img [src]="item.path">
                 </ion-slide>
             </ion-slides>
 
-            <!-- <ion-slides pager="false" (ionSlideDidChange)="onPantsFavChange()"  [options]="sliderConfig" #fav_pants style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
-                <ion-slide *ngFor="let picture of [1,2,3]">
-                    <img src="https://via.placeholder.com/250">
-                </ion-slide>
-            </ion-slides>
-
-            <ion-slides pager="false" (ionSlideDidChange)="onShoesFavChange()"  [options]="sliderConfig" #fav_shoes style="margin-bottom: 1em; max-height: 24vh; overflow-y: hidden;">
-                <ion-slide *ngFor="let picture of [1,2,3]">
-                    <img src="https://via.placeholder.com/250">
-                </ion-slide>
-            </ion-slides> -->
+            <h3 *ngIf="favos_collection.length == 0" 
+                class="ion-text-center" style="color: #CFCFCF;">Aquí podrá ver sus conjunto favoritos</h3>
         </div>
     </div>
 
     <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="this.galleryType == 'add'">
-		<ion-fab-button color="tertiary">
+        <ion-fab-button color="secondary" (click)="takePicture()">
+				<ion-icon name="camera"></ion-icon>
+            </ion-fab-button>
+            
+		<!-- <ion-fab-button color="tertiary">
 			<ion-icon name="add"></ion-icon>
 		</ion-fab-button>
 		<ion-fab-list side="top">
@@ -116,28 +163,28 @@
 			<ion-fab-button color="primary" (click)="selectImages()">
 				<ion-icon name="images"></ion-icon>
 			</ion-fab-button>
-		</ion-fab-list>
+		</ion-fab-list> -->
 	</ion-fab>
 </ion-content>
 
 <ion-footer>
 	<ion-toolbar>
         <ion-segment [(ngModel)]="galleryType" (ionChange)="segmentChanged($event)" color="mango">
-            <ion-segment-button value="home">
+            <!-- <ion-segment-button value="home">
                 <ion-icon name="home"></ion-icon>
-                HOME
-            </ion-segment-button>
+                Home
+            </ion-segment-button> -->
             <ion-segment-button value="add">
                 <ion-icon name="camera"></ion-icon>
-                AGREGAR
+                Agregar
             </ion-segment-button>
             <ion-segment-button value="combinar">
                 <ion-icon name="body"></ion-icon>
-                COMBINAR
+                Combinar
             </ion-segment-button>
             <ion-segment-button value="favorito">
                 <ion-icon name="star"></ion-icon>
-                FAVORITO
+                Favorito
             </ion-segment-button>
         </ion-segment>
 	</ion-toolbar>

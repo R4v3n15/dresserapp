@@ -25,8 +25,12 @@
 }
 
 ion-row ion-col.images {
-  max-height: 180px;
+  max-height: 160px;
   overflow-y: hidden;
+
+  img{
+    height: 100%;
+  }
 }
 
 .progress-outer {
